@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM Decision Lab</title>
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1 class="title">LLM Decision Lab</h1>
+        <p class="subtitle">Compare four model answers against project context plus the current question, surface deltas, and generate a consolidated judge package.</p>
+      </div>
+      <div class="toolbar">
+        <button class="primary" id="analyzeBtn" type="button">Analyze</button>
+        <button id="promptBtn" type="button">Build Judge Prompt</button>
+        <a class="button-link" href="llm-decision-flow.html" target="_blank" rel="noopener">Flow Guide</a>
+        <button class="ghost" id="sampleBtn" type="button">Load Sample</button>
+        <button class="ghost" id="clearBtn" type="button">Clear</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside>
+        <section class="panel">
+          <h2 class="section-title">Project Context</h2>
+          <label for="projectContextInput">Agent or Project Instructions</label>
+          <textarea id="projectContextInput" placeholder="Paste project background here, or load files such as CLAUDE.md, AGENTS.md, ACTIVE_STATE.md, MASTER_INSTRUCTIONS.md, or project brief files."></textarea>
+          <input id="projectFilesInput" type="file" multiple accept=".md,.txt,.json,.yml,.yaml,.toml" hidden>
+          <input id="projectFolderInput" type="file" multiple webkitdirectory hidden>
+          <div class="split-actions">
+            <button id="loadProjectFilesBtn" type="button">Choose Files</button>
+            <button id="loadProjectFolderBtn" type="button">Choose Folder</button>
+            <button id="clearProjectContextBtn" type="button">Clear Context</button>
+          </div>
+          <div class="weight-row">
+            <div>
+              <label for="projectWeightInput">First-Principles Weight</label>
+              <input id="projectWeightInput" type="range" min="0" max="100" step="5" value="60">
+            </div>
+            <strong id="projectWeightLabel">60/40</strong>
+          </div>
+          <div class="source-list" id="projectSourceList"></div>
+          <p class="small-note">Default scoring treats project instructions as 60% of the first-principles source and the current question as 40%.</p>
+        </section>
+
+        <section class="panel">
+          <label for="questionInput">Question</label>
+          <textarea id="questionInput" placeholder="Paste the original question here."></textarea>
+
+          <label for="constraintsInput" style="margin-top:14px;">Constraints and Success Criteria</label>
+          <textarea id="constraintsInput" placeholder="Optional: hard requirements, desired format, what matters most, known risks."></textarea>
+        </section>
+
+        <section class="panel">
+          <h2 class="section-title">Bulk Import</h2>
+          <label for="bulkInput">Combined Four Answers</label>
+          <textarea id="bulkInput" placeholder="Paste all four responses here, separated by headings such as LLM A:, Model 2:, Answer 3:, or --- lines."></textarea>
+          <div class="split-actions">
+            <button id="splitBtn" type="button">Split Into Four</button>
+            <button id="combineBtn" type="button">Combine From Four</button>
+          </div>
+          <p class="small-note">Local scoring is a rubric-based judge. For true model reasoning, use the judge prompt with your preferred LLM.</p>
+        </section>
+
+        <section class="panel">
+          <h2 class="section-title">Judging Upgrades</h2>
+          <div class="option-grid">
+            <label class="check-row"><input id="blindLabelsInput" type="checkbox" checked> Blind labels</label>
+            <label class="check-row"><input id="claimExtractionInput" type="checkbox" checked> Claim extraction</label>
+            <label class="check-row"><input id="twoPassInput" type="checkbox" checked> Two-pass judging</label>
+            <label class="check-row"><input id="adversarialInput" type="checkbox" checked> Adversarial review</label>
+          </div>
+          <p class="small-note">Default-on upgrades reduce model-name bias, normalize the four answers before scoring, compare them twice, and stress-test the winner before synthesis.</p>
+        </section>
+      </aside>
+
+      <section class="answer-grid" aria-label="Four LLM answers">
+        <article class="answer-card" data-answer-card="0">
+          <div class="answer-head">
+            <input id="name0" value="LLM A" aria-label="Answer A name">
+            <span class="score-badge" id="score0">--</span>
+          </div>
+          <div class="metric-strip">
+            <div class="metric"><span>First Principles</span><strong id="x0">--</strong></div>
+            <div class="metric"><span>Execution</span><strong id="y0">--</strong></div>
+            <div class="metric"><span>Risk</span><strong id="risk0">--</strong></div>
+          </div>
+          <textarea id="answer0" placeholder="Paste answer from LLM A."></textarea>
+          <div class="answer-foot">
+            <button type="button" data-clear-answer="0">Clear</button>
+            <button type="button" data-copy-answer="0">Copy</button>
+          </div>
+        </article>
+
+        <article class="answer-card" data-answer-card="1">
+          <div class="answer-head">
+            <input id="name1" value="LLM B" aria-label="Answer B name">
+            <span class="score-badge" id="score1">--</span>
+          </div>
+          <div class="metric-strip">
+            <div class="metric"><span>First Principles</span><strong id="x1">--</strong></div>
+            <div class="metric"><span>Execution</span><strong id="y1">--</strong></div>
+            <div class="metric"><span>Risk</span><strong id="risk1">--</strong></div>
+          </div>
+          <textarea id="answer1" placeholder="Paste answer from LLM B."></textarea>
+          <div class="answer-foot">
+            <button type="button" data-clear-answer="1">Clear</button>
+            <button type="button" data-copy-answer="1">Copy</button>
+          </div>
+        </article>
+
+        <article class="answer-card" data-answer-card="2">
+          <div class="answer-head">
+            <input id="name2" value="LLM C" aria-label="Answer C name">
+            <span class="score-badge" id="score2">--</span>
+          </div>
+          <div class="metric-strip">
+            <div class="metric"><span>First Principles</span><strong id="x2">--</strong></div>
+            <div class="metric"><span>Execution</span><strong id="y2">--</strong></div>
+            <div class="metric"><span>Risk</span><strong id="risk2">--</strong></div>
+          </div>
+          <textarea id="answer2" placeholder="Paste answer from LLM C."></textarea>
+          <div class="answer-foot">
+            <button type="button" data-clear-answer="2">Clear</button>
+            <button type="button" data-copy-answer="2">Copy</button>
+          </div>
+        </article>
+
+        <article class="answer-card" data-answer-card="3">
+          <div class="answer-head">
+            <input id="name3" value="LLM D" aria-label="Answer D name">
+            <span class="score-badge" id="score3">--</span>
+          </div>
+          <div class="metric-strip">
+            <div class="metric"><span>First Principles</span><strong id="x3">--</strong></div>
+            <div class="metric"><span>Execution</span><strong id="y3">--</strong></div>
+            <div class="metric"><span>Risk</span><strong id="risk3">--</strong></div>
+          </div>
+          <textarea id="answer3" placeholder="Paste answer from LLM D."></textarea>
+          <div class="answer-foot">
+            <button type="button" data-clear-answer="3">Clear</button>
+            <button type="button" data-copy-answer="3">Copy</button>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <section class="results" id="results" hidden>
+      <div class="result-grid">
+        <section class="panel">
+          <h2 class="section-title">Decision Snapshot</h2>
+          <div id="snapshot"></div>
+          <div class="status-row" id="statusPills"></div>
+        </section>
+
+        <section class="panel">
+          <h2 class="section-title">XY Answer Map</h2>
+          <div class="xy-wrap">
+            <div class="xy-canvas-shell">
+              <canvas id="xyCanvas" width="900" height="520"></canvas>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Answer</th>
+                  <th>X: First Principles</th>
+                  <th>Y: Execution</th>
+                  <th>Quadrant</th>
+                </tr>
+              </thead>
+              <tbody id="xyTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2 class="section-title">Score Table</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Answer</th>
+              <th>Final</th>
+              <th>Relevance</th>
+              <th>Project Fit</th>
+              <th>Reasoning</th>
+              <th>Completeness</th>
+              <th>Practicality</th>
+              <th>Specificity</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody id="scoreTable"></tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Two-Pass Judging</h2>
+        <div id="twoPassJudging"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Claim Extraction</h2>
+        <div id="claimExtraction"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Principle Source Mix</h2>
+        <div id="principleSources"></div>
+      </section>
+
+      <div class="result-grid">
+        <section class="panel">
+          <h2 class="section-title">Delta Analysis</h2>
+          <div id="deltaAnalysis"></div>
+        </section>
+
+        <section class="panel">
+          <h2 class="section-title">Human Questions</h2>
+          <div id="humanQuestions"></div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2 class="section-title">Adversarial Review</h2>
+        <div id="adversarialReview"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Consolidated Answer Draft</h2>
+        <div class="draft-answer" id="finalDraft"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Judge Prompt</h2>
+        <textarea class="judge-prompt" id="judgePrompt" readonly></textarea>
+        <div class="split-actions">
+          <button id="copyPromptBtn" type="button">Copy Judge Prompt</button>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="assets/app-core.js"></script>
+  <script src="assets/app-render.js"></script>
+  <script src="assets/app-events.js"></script>
+</body>
+</html>
