@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM Decision Flow Guide</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7f8;
+      --ink: #172033;
+      --muted: #607086;
+      --line: #d7dee8;
+      --surface: #ffffff;
+      --blue: #2868a9;
+      --green: #28745b;
+      --amber: #9b6200;
+      --red: #ad2b24;
+      --violet: #6253a3;
+      --shadow: 0 14px 32px rgba(23, 32, 51, 0.08);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1320px, 100%);
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 0 14px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.9fr) minmax(420px, 1.1fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .intro,
+    .panel,
+    .node,
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .intro {
+      padding: 22px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(1.7rem, 4vw, 3rem);
+      line-height: 1.03;
+    }
+
+    h2 {
+      margin-bottom: 12px;
+      font-size: 1.25rem;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .signal {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: #fbfcfd;
+    }
+
+    .signal strong {
+      display: block;
+      font-size: 1.8rem;
+      line-height: 1;
+      color: var(--blue);
+    }
+
+    .signal span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .flow-canvas {
+      position: relative;
+      min-height: 420px;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .flow-canvas::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 34px;
+      bottom: 34px;
+      width: 2px;
+      background: var(--line);
+    }
+
+    .flow-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 56px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .flow-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .node {
+      padding: 14px;
+      box-shadow: none;
+    }
+
+    .node strong {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      min-height: 28px;
+      margin-bottom: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #ffffff;
+      font-weight: 900;
+    }
+
+    .node.green strong {
+      background: var(--green);
+    }
+
+    .node.amber strong {
+      background: var(--amber);
+    }
+
+    .node.violet strong {
+      background: var(--violet);
+    }
+
+    .node.red strong {
+      background: var(--red);
+    }
+
+    .connector {
+      display: grid;
+      place-items: center;
+      min-height: 44px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .connector::before,
+    .connector::after {
+      content: "";
+      width: 100%;
+      border-top: 2px solid var(--line);
+    }
+
+    .connector span {
+      display: block;
+      margin: 5px 0;
+      padding: 3px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #ffffff;
+    }
+
+    .panel {
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .mini-card {
+      padding: 14px;
+      box-shadow: none;
+    }
+
+    .mini-card h3 {
+      color: #2b3850;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: #ffffff;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 10px;
+      text-align: left;
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    th {
+      color: #344158;
+      background: #f0f4f7;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .verdict {
+      border-left: 5px solid var(--green);
+    }
+
+    .upgrade {
+      border-left: 5px solid var(--blue);
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-canvas::before {
+        left: 28px;
+      }
+
+      .flow-row {
+        grid-template-columns: 1fr;
+      }
+
+      .connector {
+        min-height: 18px;
+        justify-items: start;
+        padding-left: 4px;
+      }
+
+      .connector::before,
+      .connector::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 14px;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .back-link {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <strong>LLM Decision Lab Flow</strong>
+      <a class="back-link" href="llm-deliberation-app.html">Back to App</a>
+    </div>
+
+    <section class="hero">
+      <div class="intro">
+        <h1>Decision Flow for Four LLM Answers</h1>
+        <p>The strongest workflow treats the project background as standing truth, treats the current question as the local objective, hides model identity during judging, extracts claims into the same shape, then uses two-pass scoring and adversarial review before synthesis.</p>
+        <div class="signal-grid">
+          <div class="signal">
+            <strong>60%</strong>
+            <span>Project instructions, active state, master rules, background context</span>
+          </div>
+          <div class="signal">
+            <strong>40%</strong>
+            <span>Current question, constraints, success criteria, user intent</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel flow-canvas" aria-label="LLM decision process flow">
+        <div class="flow-row">
+          <div class="node green">
+            <strong>1</strong>
+            <h3>Harvest Context</h3>
+            <p>Load agent files such as instruction files, active state files, master instructions, project briefs, and pasted project background.</p>
+          </div>
+          <div class="connector"><span>then</span></div>
+          <div class="node">
+            <strong>2</strong>
+            <h3>Read the Question</h3>
+            <p>Extract the immediate objective, success criteria, constraints, unknowns, and the expected final format.</p>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="node amber">
+            <strong>3</strong>
+            <h3>Blind the Labels</h3>
+            <p>Use Answer A, B, C, and D during scoring so model reputation does not quietly influence the judge.</p>
+          </div>
+          <div class="connector"><span>then</span></div>
+          <div class="node violet">
+            <strong>4</strong>
+            <h3>Extract Claims</h3>
+            <p>Turn each response into comparable parts: core recommendation, assumptions, evidence, actions, and risks.</p>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="node">
+            <strong>5</strong>
+            <h3>Pass 1 Score</h3>
+            <p>Score each answer independently using project fit, relevance, first-principles reasoning, execution, specificity, and risk.</p>
+          </div>
+          <div class="connector"><span>then</span></div>
+          <div class="node green">
+            <strong>6</strong>
+            <h3>Delta Analysis</h3>
+            <p>Find shared conclusions, unique strengths, contradictions, missing safeguards, and ideas worth borrowing.</p>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="node violet">
+            <strong>7</strong>
+            <h3>Pass 2 Re-Rank</h3>
+            <p>Adjust after seeing consensus, unique useful ideas, claim completeness, gaps, and peer conflict flags.</p>
+          </div>
+          <div class="connector"><span>then</span></div>
+          <div class="node red">
+            <strong>8</strong>
+            <h3>Adversarial Review</h3>
+            <p>Attack the likely winner: look for hidden assumptions, weak verification, near-ties, and project-context misses.</p>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="node amber">
+            <strong>9</strong>
+            <h3>Human Gate</h3>
+            <p>If scores are close, facts are missing, or tradeoffs depend on preference, pause and ask the human.</p>
+          </div>
+          <div class="connector"><span>then</span></div>
+          <div class="node green">
+            <strong>10</strong>
+            <h3>Synthesize</h3>
+            <p>Use the best answer as the backbone, borrow strong parts from weaker answers, and repair gaps before finalizing.</p>
+          </div>
+        </div>
+
+        <div class="flow-row">
+          <div class="node">
+            <strong>11</strong>
+            <h3>Explain the Decision</h3>
+            <p>Show the XY table, score movement, delta analysis, adversarial findings, and why the final answer won.</p>
+          </div>
+          <div class="connector"><span>then</span></div>
+          <div class="node">
+            <strong>12</strong>
+            <h3>Save Learning</h3>
+            <p>When a decision reveals a reusable principle, add it back to project instructions so future judgments start stronger.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel verdict">
+      <h2>Is This the Best Process?</h2>
+      <p>This is a stronger process for "borrow strengths and fill gaps" than simple voting because it avoids three common traps: model-name bias, unstructured comparison, and overconfident winner selection.</p>
+      <p>The remaining weakness is that local HTML scoring is still heuristic. The best version uses the app for structure and traceability, then sends the judge prompt to a real LLM or local model for deeper reasoning.</p>
+    </section>
+
+    <section class="two-col">
+      <div class="panel">
+        <h2>Recommended Scoring Axes</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Axis</th>
+              <th>What It Tests</th>
+              <th>Why It Matters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Project Fit</td>
+              <td>Alignment with loaded instructions and standing context</td>
+              <td>Prevents answers that sound good but violate project reality</td>
+            </tr>
+            <tr>
+              <td>Relevance</td>
+              <td>Fit to the current question and constraints</td>
+              <td>Prevents generic advice from winning</td>
+            </tr>
+            <tr>
+              <td>First Principles</td>
+              <td>Assumptions, causal logic, tradeoffs, and decision criteria</td>
+              <td>Separates explanation from surface plausibility</td>
+            </tr>
+            <tr>
+              <td>Claim Completeness</td>
+              <td>Whether recommendation, assumptions, evidence, actions, and risks are explicit</td>
+              <td>Makes very different answers comparable before scoring</td>
+            </tr>
+            <tr>
+              <td>Execution</td>
+              <td>Steps, formats, examples, and verification</td>
+              <td>Turns the decision into something usable</td>
+            </tr>
+            <tr>
+              <td>Risk</td>
+              <td>Failure modes, uncertainty, and human escalation points</td>
+              <td>Stops overconfident consolidation</td>
+            </tr>
+            <tr>
+              <td>Pass 2 Delta</td>
+              <td>Score movement after consensus, uniqueness, and conflict review</td>
+              <td>Rewards answers that survive comparison, not just isolated scoring</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>Human Gate Rules</h2>
+        <ul>
+          <li>Ask the human when the top two answers are within a small score margin.</li>
+          <li>Ask when a decision depends on preference, budget, risk tolerance, or hidden facts.</li>
+          <li>Ask when all four answers agree but none mention the main failure mode.</li>
+          <li>Ask when the project files and the current question pull in different directions.</li>
+          <li>Do not ask when the missing detail can be safely inferred from loaded context.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel upgrade">
+      <h2>Built-In Safeguards</h2>
+      <div class="mini-grid">
+        <div class="mini-card">
+          <h3>Two-Pass Judging</h3>
+          <p>First score each answer independently. Then re-rank after seeing consensus, unique contributions, gaps, and conflicts.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Blind Labels</h3>
+          <p>Hide model names during scoring. Use Answer A, B, C, D until the final report to reduce brand bias.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Claim Extraction</h3>
+          <p>Before scoring, extract each answer's core claims, assumptions, and proposed actions into a common structure.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Adversarial Review</h3>
+          <p>Try to falsify the winning answer before final synthesis. The goal is not negativity; it is decision hygiene.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Evidence Tags</h3>
+          <p>Mark which lines came from project files, the user question, each answer, or the judge's inference.</p>
+        </div>
+        <div class="mini-card">
+          <h3>Memory Update</h3>
+          <p>After the human accepts a final direction, store the reusable principle back into the project background.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
