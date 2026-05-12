@@ -71,7 +71,7 @@ The app is pure static HTML. It can organize, score heuristically, and generate 
 
 ## Reference Concepts
 
-- OpenAI evals and graders
-- OpenAI trace grading for agent workflows
-- Anthropic agent workflow patterns, especially parallelization and evaluator-optimizer loops
-- NIST AI RMF ideas on measurement, independent review, and documented risk controls
+- [OpenAI graders](https://platform.openai.com/docs/guides/graders/) for structured scoring and model graders.
+- [OpenAI trace grading](https://platform.openai.com/docs/guides/trace-grading) for evaluating agent traces and orchestration quality.
+- [Anthropic: Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) for parallelization, voting, evaluator-optimizer loops, and human checkpoints.
+- [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework) for AI risk management, measurement, governance, and documented controls.
