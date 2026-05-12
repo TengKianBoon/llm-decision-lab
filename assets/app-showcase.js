@@ -5,6 +5,8 @@
 
   window.buildJudgePrompt = function enhancedShowcaseJudgePrompt(input, analyses) {
     const basePrompt = previousBuildJudgePrompt(input, analyses);
+    const projectWeight = Math.round((typeof input?.projectWeight === "number" ? input.projectWeight : 0.6) * 100);
+    const questionWeight = 100 - projectWeight;
 
     const enhancedGoal = `Goal:
 Use an evaluation-harness mindset: define the outcome, translate the outcome into a rubric, act as the grader, compare and contrast the four answers, borrow the best parts from each, reason from first principles and best practices, ask the human if the facts are insufficient, and produce the best consolidated final answer.`;
@@ -13,7 +15,7 @@ Use an evaluation-harness mindset: define the outcome, translate the outcome int
 1. Do not simply average the answers.
 2. Restate the desired outcome in one sentence: what "done" means for this question.
 3. Convert that outcome into a compact rubric before scoring.
-4. State the first-principles criteria you used, using the project context as the configured first-principles source mix.
+4. State the first-principles criteria you used, using the project context as ${projectWeight}% of the first-principles source and the current question/constraints as ${questionWeight}%.
 5. Identify what each answer gets right and wrong.
 6. If two directions are tied 2 vs 2, present both options and ask the human to choose.
 7. If you can decide, produce one final consolidated answer and explain why it is best.
