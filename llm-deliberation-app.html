@@ -11,7 +11,7 @@
     <header class="topbar">
       <div>
         <h1 class="title">LLM Decision Lab</h1>
-        <p class="subtitle">Compare four model answers against project context plus the current question, surface deltas, and generate a consolidated judge package.</p>
+        <p class="subtitle">Compare four model answers through a small decision harness: project context, outcomes, rubrics, graders, deltas, adversarial review, and human approval.</p>
       </div>
       <div class="toolbar">
         <button class="primary" id="analyzeBtn" type="button">Analyze</button>
@@ -74,6 +74,16 @@
             <label class="check-row"><input id="adversarialInput" type="checkbox" checked> Adversarial review</label>
           </div>
           <p class="small-note">Default-on upgrades reduce model-name bias, normalize the four answers before scoring, compare them twice, and stress-test the winner before synthesis.</p>
+        </section>
+
+        <section class="panel">
+          <h2 class="section-title">Application Notes</h2>
+          <ul class="analysis-list">
+            <li><strong>Harness Engineering:</strong> wraps LLM answers with context intake, scoring controls, comparison traces, review loops, and a human gate.</li>
+            <li><strong>Outcomes to Rubrics to Graders:</strong> defines what "done" means, converts it into scoring criteria, then uses the local grader and judge prompt to review outputs.</li>
+            <li><strong>Multi-Agent Decision Pattern:</strong> four answers provide parallel perspectives; blind labels, claim extraction, two-pass judging, and adversarial review turn them into a better consolidated answer.</li>
+          </ul>
+          <p class="small-note">This browser app is a transparent showcase harness. It does not upload data or secretly read private files; you choose what to paste or load.</p>
         </section>
       </aside>
 
@@ -246,5 +256,6 @@
   <script src="assets/app-core.js"></script>
   <script src="assets/app-render.js"></script>
   <script src="assets/app-events.js"></script>
+  <script src="assets/app-showcase.js"></script>
 </body>
 </html>
