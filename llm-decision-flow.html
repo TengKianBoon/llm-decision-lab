@@ -360,7 +360,7 @@
     <section class="hero">
       <div class="intro">
         <h1>Decision Flow for Four LLM Answers</h1>
-        <p>The strongest workflow treats the project background as standing truth, treats the current question as the local objective, hides model identity during judging, extracts claims into the same shape, then uses two-pass scoring and adversarial review before synthesis.</p>
+        <p>The strongest workflow is a small decision harness: harvest standing context, define the outcome, convert the outcome into a rubric, grade four blind answers, run adversarial review, and synthesize only after the human gate is clear.</p>
         <div class="signal-grid">
           <div class="signal">
             <strong>60%</strong>
@@ -369,6 +369,14 @@
           <div class="signal">
             <strong>40%</strong>
             <span>Current question, constraints, success criteria, user intent</span>
+          </div>
+          <div class="signal">
+            <strong>Outcome</strong>
+            <span>What "done" means before any answer is allowed to win</span>
+          </div>
+          <div class="signal">
+            <strong>Grader</strong>
+            <span>The maker-checker layer that scores, critiques, and improves the result</span>
           </div>
         </div>
       </div>
@@ -383,8 +391,8 @@
           <div class="connector"><span>then</span></div>
           <div class="node">
             <strong>2</strong>
-            <h3>Read the Question</h3>
-            <p>Extract the immediate objective, success criteria, constraints, unknowns, and the expected final format.</p>
+            <h3>Define Outcome</h3>
+            <p>Extract what done means: immediate objective, success criteria, constraints, unknowns, and expected final format.</p>
           </div>
         </div>
 
@@ -405,8 +413,8 @@
         <div class="flow-row">
           <div class="node">
             <strong>5</strong>
-            <h3>Pass 1 Score</h3>
-            <p>Score each answer independently using project fit, relevance, first-principles reasoning, execution, specificity, and risk.</p>
+            <h3>Rubric and Pass 1</h3>
+            <p>Turn the outcome into criteria, then score each answer independently using project fit, relevance, first-principles reasoning, execution, specificity, and risk.</p>
           </div>
           <div class="connector"><span>then</span></div>
           <div class="node green">
@@ -464,6 +472,52 @@
       <h2>Is This the Best Process?</h2>
       <p>This is a stronger process for "borrow strengths and fill gaps" than simple voting because it avoids three common traps: model-name bias, unstructured comparison, and overconfident winner selection.</p>
       <p>The remaining weakness is that local HTML scoring is still heuristic. The best version uses the app for structure and traceability, then sends the judge prompt to a real LLM or local model for deeper reasoning.</p>
+    </section>
+
+    <section class="panel upgrade">
+      <h2>Showcase Framing: Harness Engineering</h2>
+      <p>LLM Decision Lab is not only a four-answer comparison screen. It is a lightweight harness for decision-grade AI work: context, outcome, rubric, grader, critique, trace, and human approval.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Practice Pattern</th>
+            <th>How The App Uses It</th>
+            <th>Why It Improves Decisions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Harness Engineering</td>
+            <td>Wraps LLM outputs with context intake, scoring controls, review stages, and a final judge prompt.</td>
+            <td>Makes the workflow inspectable instead of relying on a single impressive answer.</td>
+          </tr>
+          <tr>
+            <td>Outcomes to Rubrics to Graders</td>
+            <td>Defines what the answer must accomplish, translates that into scoring axes, then grades each response against the same criteria.</td>
+            <td>Turns "good answer" into measurable quality signals that can be improved.</td>
+          </tr>
+          <tr>
+            <td>Parallel Voting</td>
+            <td>Uses four independent answers as diverse proposals before selecting a backbone.</td>
+            <td>Improves coverage by letting different models surface different assumptions, risks, and options.</td>
+          </tr>
+          <tr>
+            <td>Evaluator-Optimizer Loop</td>
+            <td>Pass 1 scores independently; Pass 2 re-ranks after deltas, consensus, uniqueness, and gaps are visible.</td>
+            <td>Lets the answer improve after structured feedback instead of stopping at the first draft.</td>
+          </tr>
+          <tr>
+            <td>Adversarial Review</td>
+            <td>Stress-tests the likely winner for hidden assumptions, weak verification, near ties, and project-context misses.</td>
+            <td>Reduces overconfidence before the final answer is shown to the human.</td>
+          </tr>
+          <tr>
+            <td>Human Gate</td>
+            <td>Escalates ties, missing facts, preference tradeoffs, and risky assumptions.</td>
+            <td>Keeps accountability with the human when judgment cannot be safely inferred.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="two-col">
