@@ -4,6 +4,18 @@ LLM Decision Lab is a static HTML decision-harness app for comparing four LLM an
 
 It is designed for workflows where the project background matters. The app can load or paste project instructions, then score answers using a default first-principles mix of 60% project context and 40% current question.
 
+## Why I built it
+
+When four models answer the same question, the temptation is to keep the one that sounds best. I wanted a way of choosing that would survive being questioned afterwards.
+
+**The decisions that shaped it:**
+
+- **Blind labels.** Model names are hidden during scoring, so brand preference cannot masquerade as judgement.
+- **Project context carries the weight.** Answers score 60% on fit with the project background and 40% on the question itself. An answer that is generally excellent but wrong for this project should lose.
+- **Uncertainty goes to a human.** Ties, missing facts, preference trade-offs and high-risk assumptions are escalated, not resolved quietly by another model.
+
+I designed the rubric, the weighting and the escalation rule. The implementation was AI-assisted, against acceptance criteria I wrote.
+
 ## Showcase Framing
 
 This project demonstrates a practical `Outcomes -> Rubrics -> Graders` workflow for agentic and multi-agent decision work:
